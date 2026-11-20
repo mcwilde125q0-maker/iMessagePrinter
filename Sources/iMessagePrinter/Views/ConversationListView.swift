@@ -4,15 +4,22 @@ struct ConversationListView: View {
     @Environment(AppState.self) private var appState
 
     var body: some View {
-        @Bindable var state = appState
+        let selectionBinding = Binding<ConversationInfo?>(
+            get: { appState.selectedConversation },
+            set: { appState.selectedConversation = $0 }
+        )
+        let searchBinding = Binding<String>(
+            get: { appState.searchText },
+            set: { appState.searchText = $0 }
+        )
 
         ZStack(alignment: .bottom) {
-            List(appState.filteredConversations, selection: $state.selectedConversation) { conversation in
+            List(appState.filteredConversations, selection: selectionBinding) { conversation in
                 ConversationRowView(conversation: conversation)
                     .tag(conversation)
             }
             .disabled(appState.isExportingPDF)
-            .searchable(text: $state.searchText, prompt: "Search conversations")
+            .searchable(text: searchBinding, prompt: "Search conversations")
             .navigationTitle("Conversations")
             .onChange(of: appState.selectedConversation) { _, newValue in
                 if let conversation = newValue {
